@@ -346,6 +346,9 @@ class HardwareManager(object):
     def get_bmc_address(self):
         raise errors.IncompatibleHardwareMethodError()
 
+    def get_serial_number(self):
+        raise errors.IncompatibleHardwareMethodError()
+
     def get_boot_info(self):
         raise errors.IncompatibleHardwareMethodError()
 
@@ -445,6 +448,7 @@ class HardwareManager(object):
         hardware_info['bmc_address'] = self.get_bmc_address()
         hardware_info['system_vendor'] = self.get_system_vendor_info()
         hardware_info['boot'] = self.get_boot_info()
+        hardware_info['serial_number'] = self.get_serial_number()
         return hardware_info
 
     def get_clean_steps(self, node, ports):
@@ -654,6 +658,10 @@ class GenericHardwareManager(HardwareManager):
             network_interfaces_list.append(result)
 
         return network_interfaces_list
+
+    def get_serial_number(self):
+        serial_number = utils.execute("sudo dmidecode -t 1 | grep Serial| awk -F: '{print $2}'",shell=True)[0]
+        return serial_number.strip()
 
     def get_cpus(self):
         lines = utils.execute('lscpu')[0]
